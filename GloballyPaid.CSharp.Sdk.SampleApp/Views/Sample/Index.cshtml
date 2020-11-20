@@ -1,0 +1,75 @@
+﻿@inject Microsoft.Extensions.Configuration.IConfiguration configuration;
+
+@{
+    ViewData["Title"] = "Sample";
+}
+
+@section Styles{
+    <style>
+        .example {
+            width: 70%;
+            height: 600px;
+            box-shadow: 0 0 15px -6px rgba(0,0,0,0.75);
+            border-radius: 10px;
+            padding: 20px 20px 19px 20px;
+            margin: 15px;
+        }
+    </style>
+}
+
+<section>
+    <div class="example" id="gpg-form-container"></div>
+</section>
+
+@section Scripts{
+    <script src="https://unpkg.com/&#64;globallypaid/js-sdk&#64;latest"></script>
+
+    <script type="text/javascript">
+        var gpg = new GloballyPaidSDK('@configuration["GloballyPaid:PublishableApiKey"]');
+        var cardExtended = gpg.createForm('card-extended');
+
+        cardExtended.mount('gpg-form-container');
+
+        cardExtended.on('TOKEN_CREATION',
+            (token) => {
+                console.log(token);
+
+                // Prepare Charge Request (Sale request)
+                var saleObject = {
+                    "source": token.id,
+                    "amount": 1299,
+                };
+
+                var data = JSON.stringify(saleObject);
+
+                // submit transaction to your server
+                // make sure you're submitting the token instead of the card data
+                // and storing the token on your servers
+                jQuery.ajax({
+                    type: "POST",
+                    url: "/Sample/Charge",
+                    data: data,
+                    contentType: "application/json",
+                    datatype: "json",
+                    async: false,
+                    success: function (responseFromServer) {
+                        cardExtended.showSuccess();
+                        console.log(responseFromServer);
+                    },
+                    error: function (ajax_error) {
+                        cardExtended.showError("Charge Failed. Please check your browser console for logs.");
+                        console.log(ajax_error);
+                    }
+                });
+
+            },
+            (error) => {
+                cardExtended.showError("Charge Failed. Please check your browser console for logs.");
+                console.log(error);
+            }
+        );
+    </script>
+}
+
+
+
