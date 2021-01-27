@@ -6,19 +6,63 @@
 
 @section Styles{
     <style>
-        .example {
-            width: 70%;
-            height: 600px;
-            box-shadow: 0 0 15px -6px rgba(0,0,0,0.75);
-            border-radius: 10px;
+        .example-div {
+            width: 55%;
             padding: 20px 20px 19px 20px;
             margin: 15px;
+        }
+        .example-table {
+            width: 100%;
+        }
+        .right {
+            text-align: right;
+            margin-right: 1em;
         }
     </style>
 }
 
+@{var total = 11.84;}
+@Html.Hidden("myVar", total)
+
 <section>
-    <div class="example" id="gpg-form-container"></div>
+    <div class="example-div">
+        <table class="example-table" border="0">
+            <tr>
+                <td><b>Order Summary</b></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td colspan="2"><hr /></td>
+            </tr>
+            <tr>
+                <td>Items:</td>
+                <td class="right">$10.73</td>
+            </tr>
+            <tr>
+                <td>Shipping & handling:</td>
+                <td class="right">$0.00</td>
+            </tr>
+            <tr>
+                <td>Total before tax:</td>
+                <td class="right">$10.73</td>
+            </tr>
+            <tr>
+                <td>Estimated tax to be collected:</td>
+                <td class="right">$0.85</td>
+            </tr>
+            <tr>
+                <td colspan="2"><hr /></td>
+            </tr>
+            <tr>
+                <td><b>Order Total:</b></td>
+                <td class="right">$@total</td>
+            </tr>
+        </table>
+    </div>
+</section>
+
+<section>
+    <div class="example-div" id="gpg-form-container"></div>
 </section>
 
 @section Scripts{
@@ -37,7 +81,7 @@
                 // Prepare Charge Request (Sale request)
                 var saleObject = {
                     "source": token.id,
-                    "amount": 1299,
+                    "amount": 100 * ($('#myVar').val()), //taken from web application
                 };
 
                 var data = JSON.stringify(saleObject);
@@ -68,6 +112,47 @@
                 console.log(error);
             }
         );
+
+        // Company must be OneClick enebled
+        cardExtended.on('ONE_CLICK_PAYMENT_SUBMIT',
+            (oneClickData) => {
+                console.log(oneClickData);
+
+                // Prepare Charge Request (Sale request)
+                var saleObject = {
+                    "source": oneClickData.id,
+                    "amount": 100 * ($('#myVar').val()), //taken from web application
+                };
+
+                var data = JSON.stringify(saleObject);
+
+                // submit transaction to your server
+                // make sure you're submitting the token instead of the card data
+                // and storing the token on your servers
+                jQuery.ajax({
+                    type: "POST",
+                    url: "/Sample/Charge",
+                    data: data,
+                    contentType: "application/json",
+                    datatype: "json",
+                    async: false,
+                    success: function (responseFromServer) {
+                        alert("Done. Approved: " + responseFromServer.approved)
+                        console.log(responseFromServer);
+                    },
+                    error: function (ajax_error) {
+                        alert("Charge Failed. Please check your browser console for logs.")
+                        console.log(ajax_error);
+                    }
+                });
+
+            },
+            (error) => {
+                cardExtended.showError("Charge Failed. Please check your browser console for logs.");
+                console.log(error);
+            }
+        );
+
     </script>
 }
 

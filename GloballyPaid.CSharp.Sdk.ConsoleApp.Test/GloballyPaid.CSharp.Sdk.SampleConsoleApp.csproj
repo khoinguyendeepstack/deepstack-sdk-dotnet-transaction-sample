@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GloballyPaid.net" Version="1.0.0.1" />
+    <PackageReference Include="GloballyPaid.net" Version="1.0.0.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.9" />
   </ItemGroup>
 

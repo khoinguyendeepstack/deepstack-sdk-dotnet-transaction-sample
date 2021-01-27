@@ -26,8 +26,8 @@ namespace GloballyPaid.CSharp.Sdk.SampleApp.Controllers
         {
             var request = new ChargeRequest
             {
-                Source = "source", //this can be the token or payment instrument identifier
-                Amount = 1299,
+                Source = chargeRequest.Source, //this can be the token or payment instrument identifier
+                Amount = chargeRequest.Amount,
                 Capture = true, //sale charge
                 ClientCustomerId = "12345", //set your customer id
                 ClientInvoiceId = "IX213", //set your invoice id

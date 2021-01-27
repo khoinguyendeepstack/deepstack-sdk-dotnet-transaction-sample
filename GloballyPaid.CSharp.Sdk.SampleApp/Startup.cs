@@ -21,8 +21,8 @@ namespace GloballyPaid.CSharp.Sdk.SampleApp
             services.AddControllersWithViews();
 
             services.AddGloballyPaid(
-                Configuration.GetValue<string>("GloballyPaid:PublishableApiKey "), 
-                Configuration.GetValue<string>("GloballyPaid:SharedSecret "), 
+                Configuration.GetValue<string>("GloballyPaid:PublishableApiKey"), 
+                Configuration.GetValue<string>("GloballyPaid:SharedSecret"), 
                 Configuration.GetValue<string>("GloballyPaid:AppId"),
                 Configuration.GetValue<bool>("GloballyPaid:UseSandbox"),
                 Configuration.GetValue<int>("GloballyPaid:RequestTimeoutSeconds"));
