@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using System;
 
 namespace GloballyPaid
@@ -31,7 +32,7 @@ namespace GloballyPaid
                 Source = tokenAuth.Id,
                 Amount = 2299,
                 ClientCustomerId = "0000000",
-                Recurring = false,
+                CofType = CofType.UNSCHEDULED_CARDHOLDER,
                 CurrencyCode = CurrencyCode.USD,
                 CountryCode = CountryCode.US,
                 ClientTransactionId = "000000000",
@@ -59,7 +60,7 @@ namespace GloballyPaid
                 Source = tokenSale.Id,
                 Amount = 2299,
                 ClientCustomerId = "0000000",
-                Recurring = false,
+                CofType = CofType.UNSCHEDULED_CARDHOLDER,
                 CurrencyCode = CurrencyCode.USD,
                 CountryCode = CountryCode.US,
                 ClientTransactionId = "000000000",
@@ -73,6 +74,28 @@ namespace GloballyPaid
                 Charge = chargeSale.Id
             });
 
+            //sale charge transaction with pan source
+            var panSource = JsonConvert.SerializeObject(tokenizeRequest.PaymentInstrument);
+            var chargePanSale = _chargeService.Charge(new ChargeRequest
+            {
+                Source = panSource,
+                Amount = 2299,
+                ClientCustomerId = "0000000",
+                CofType = CofType.UNSCHEDULED_CARDHOLDER,
+                CurrencyCode = CurrencyCode.USD,
+                CountryCode = CountryCode.US,
+                ClientTransactionId = "000000000",
+                ClientTransactionDescription = "ChargeWithPan new HMAC",
+                ClientInvoiceId = "000000",
+                AVS = false,
+                SavePaymentInstrument = true
+            });
+            var refundPanSale = _refundService.Refund(new RefundRequest
+            {
+                Amount = chargePanSale.Amount,
+                Charge = chargePanSale.Id
+            });
+
             //sale charge transaction, with saved payment instrument
             var tokenPaymentInstrument = _tokenService.Tokenize(tokenizeRequest);
             var chargePaymentInstrument = _chargeService.Charge(new ChargeRequest
@@ -80,7 +103,7 @@ namespace GloballyPaid
                 Source = tokenPaymentInstrument.Id,
                 Amount = 2299,
                 ClientCustomerId = "0000000",
-                Recurring = false,
+                CofType = CofType.UNSCHEDULED_CARDHOLDER,
                 CurrencyCode = CurrencyCode.USD,
                 CountryCode = CountryCode.US,
                 ClientTransactionId = "000000000",
