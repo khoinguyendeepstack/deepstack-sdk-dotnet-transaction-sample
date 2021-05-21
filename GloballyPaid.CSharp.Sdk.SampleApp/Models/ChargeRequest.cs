@@ -5,5 +5,7 @@ namespace GloballyPaid.CSharp.Sdk.SampleApp.Models
         public string Source { get; set; }
 
         public long Amount { get; set; }
+
+        public string CVV { get; set; }
     }
 }

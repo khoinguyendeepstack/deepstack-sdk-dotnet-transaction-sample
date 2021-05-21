@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GloballyPaid.net" Version="1.0.0.2" />
+    <PackageReference Include="GloballyPaid.net" Version="1.0.0.5" />
   </ItemGroup>
 
 </Project>

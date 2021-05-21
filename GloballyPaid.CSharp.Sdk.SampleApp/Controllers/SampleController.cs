@@ -31,12 +31,22 @@ namespace GloballyPaid.CSharp.Sdk.SampleApp.Controllers
                 Capture = true, //sale charge
                 ClientCustomerId = "12345", //set your customer id
                 ClientInvoiceId = "IX213", //set your invoice id
-                ClientTransactionDescription = "Tuition for CS" //set your transaction description
+                ClientTransactionDescription = "Tuition for CS",
+                CVV = chargeRequest.CVV,
+                CofType = CofType.UNSCHEDULED_CARDHOLDER
             };
 
-            var charge = _chargeService.Charge(request);
+            try
+            {
+                var charge = _chargeService.Charge(request);
+                return Ok(charge);
 
-            return Ok(charge);
+            }
+            catch (System.Exception ex)
+            {
+                var exx = ex;
+                throw;
+            }
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

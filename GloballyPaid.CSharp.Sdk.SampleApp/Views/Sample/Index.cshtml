@@ -66,22 +66,26 @@
 </section>
 
 @section Scripts{
-    <script src="https://unpkg.com/&#64;globallypaid/js-sdk&#64;latest"></script>
+    <script src="https://unpkg.com/&#64;globallypaid/js-sdk&#64;3.0.0"></script>
 
     <script type="text/javascript">
         var gpg = new GloballyPaidSDK('@configuration["GloballyPaid:PublishableApiKey"]');
         var cardExtended = gpg.createForm('card-extended');
+        //var cardExtended = gpg.createForm('card-simple');
 
         cardExtended.mount('gpg-form-container');
 
-        cardExtended.on('TOKEN_CREATION',
+        cardExtended.on('FORM_RESPONSE',
             (token) => {
                 console.log(token);
 
                 // Prepare Charge Request (Sale request)
                 var saleObject = {
-                    "source": token.id,
+                    "source": token.token,
                     "amount": 100 * ($('#myVar').val()), //taken from web application
+                    "cvv": token.cvv,
+                //    "kountSessionId": token.kountSessionId, 
+                //    "billingContact": token.billingContact  // check the spec for token.billingContact
                 };
 
                 var data = JSON.stringify(saleObject);
@@ -120,8 +124,9 @@
 
                 // Prepare Charge Request (Sale request)
                 var saleObject = {
-                    "source": oneClickData.id,
-                    "amount": 100 * ($('#myVar').val()), //taken from web application
+                    "source": oneClickData.token,
+                    "amount": 100 * ($('#myVar').val()),
+                    //    "billingContact": token.billingContact  // check the spec for token.billingContact//taken from web application
                 };
 
                 var data = JSON.stringify(saleObject);
