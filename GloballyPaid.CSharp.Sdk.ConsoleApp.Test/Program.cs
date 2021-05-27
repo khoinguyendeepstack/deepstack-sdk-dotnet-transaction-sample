@@ -100,7 +100,7 @@ namespace GloballyPaid
             });
 
             //tokenize & sale charge transaction
-            var charge = _chargeService.Charge(GetPaymentInstrumentRequest(), 2299);
+            var charge = _chargeService.Charge(GetPaymentInstrumentRequest(), 99);
             var refundCharge = _refundService.Refund(new RefundRequest
             {
                 Amount = charge.Amount,
@@ -130,7 +130,7 @@ namespace GloballyPaid
             customer = _customerService.Get(customer.Id);
 
             customer.LastName = "Smith";
-            customer = _customerService.Update(customer);
+            _customerService.Update(customer);
             customer = _customerService.Get(customer.Id);
 
             _customerService.Delete(customer.Id);
