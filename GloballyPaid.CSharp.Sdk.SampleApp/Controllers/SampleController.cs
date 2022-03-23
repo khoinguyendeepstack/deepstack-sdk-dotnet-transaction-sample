@@ -26,14 +26,30 @@ namespace GloballyPaid.CSharp.Sdk.SampleApp.Controllers
         {
             var request = new ChargeRequest
             {
-                Source = chargeRequest.Source, //this can be the token or payment instrument identifier
-                Amount = chargeRequest.Amount,
-                Capture = true, //sale charge
-                ClientCustomerId = "12345", //set your customer id
-                ClientInvoiceId = "IX213", //set your invoice id
-                ClientTransactionDescription = "Tuition for CS",
-                CVV = chargeRequest.CVV,
-                CofType = CofType.UNSCHEDULED_CARDHOLDER
+                Source = new PaymentSourceCardOnFile()
+                {
+                    Type = PaymentSourceType.CARD_ON_FILE,
+                    CardOnFile = new CardOnFile()
+                    {
+                        Id = chargeRequest.Source,
+                        CVV = chargeRequest.CVV // should be provided when the transaction is user attended
+                    }
+                },
+                Params = new TransactionParameters()
+                {
+                    Amount = chargeRequest.Amount,
+                    Capture = true, //sale charge
+                    CofType = CofType.UNSCHEDULED_CARDHOLDER,
+                    CurrencyCode = CurrencyCode.USD,
+                    CountryCode = ISO3166CountryCode.USA,
+                    SavePaymentInstrument = true
+                },
+                Meta = new TransactionMeta(){
+                    ClientCustomerID = "12345", //set your customer id
+                    ClientInvoiceID = "IX213", //set your invoice id
+                    ClientTransactionDescription = "E-comm order", // any useful description
+                    ClientTransactionID = "000111222333"
+                }
             };
 
             try

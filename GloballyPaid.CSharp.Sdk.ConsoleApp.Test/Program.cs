@@ -28,83 +28,117 @@ namespace GloballyPaid
             var tokenAuth = _tokenService.Tokenize(tokenizeRequest);
             var chargeAuth = _chargeService.Charge(new ChargeRequest
             {
-                Source = tokenAuth.Id,
-                Amount = 99,
-                ClientCustomerId = "0000000",
-                CofType = CofType.UNSCHEDULED_CARDHOLDER,
-                CurrencyCode = CurrencyCode.USD,
-                CountryCode = CountryCode.US,
-                ClientTransactionId = "000000000",
-                ClientTransactionDescription = "Description",
-                ClientInvoiceId = "000000",
-                Capture = false,
-                CVV = "999"
+                Source = new PaymentSourceCardOnFile()
+                {
+                    Type = PaymentSourceType.CARD_ON_FILE,
+                    CardOnFile = new  CardOnFile()
+                    {
+                        Id =  tokenAuth.Id,
+                        CVV = "" // should provide when user attended
+                    }
+                },
+                Params = new TransactionParameters()
+                {
+                    Amount = 99,
+                    Capture = false,
+                    CofType = CofType.UNSCHEDULED_CARDHOLDER,
+                    CurrencyCode = CurrencyCode.USD,
+                    CountryCode = ISO3166CountryCode.USA,
+                },
+                Meta = new TransactionMeta()
+                {
+                    ClientCustomerID = "0000000",
+                    ClientTransactionID = "000000000",
+                    ClientTransactionDescription = "Description",
+                    ClientInvoiceID = "000000",
+                }
+
             }, new RequestOptions(requestTimeoutSeconds: 50));
 
             var captureAuth = _captureService.Capture(new CaptureRequest
             {
                 Amount = chargeAuth.Amount,
-                Charge = chargeAuth.Id
+                Charge = chargeAuth.ID
             });
 
             var refundAuth = _refundService.Refund(new RefundRequest
             {
                 Amount = chargeAuth.Amount,
-                Charge = chargeAuth.Id
+                Charge = chargeAuth.ID
             });
 
             //sale charge transaction
             var tokenSale = _tokenService.Tokenize(tokenizeRequest);
             var chargeSale = _chargeService.Charge(new ChargeRequest
             {
-                Source = tokenSale.Id,
-                Amount = 99,
-                ClientCustomerId = "0000000",
-                CofType = CofType.UNSCHEDULED_CARDHOLDER,
-                CurrencyCode = CurrencyCode.USD,
-                CountryCode = CountryCode.US,
-                ClientTransactionId = "000000000",
-                ClientTransactionDescription = "ChargeWithToken new HMAC",
-                ClientInvoiceId = "000000",
-                AVS = false,
-                CVV = "999"
+                Source = new PaymentSourceCardOnFile()
+                {
+                    Type = PaymentSourceType.CARD_ON_FILE,
+                    CardOnFile = new  CardOnFile()
+                    {
+                        Id =  tokenSale.Id,
+                        CVV = "999" // should provide when user attended
+                    }
+                },
+                Params = new TransactionParameters()
+                {
+                    Amount = 99,
+                    Capture = true,
+                    CofType = CofType.UNSCHEDULED_CARDHOLDER,
+                    CurrencyCode = CurrencyCode.USD,
+                    CountryCode = ISO3166CountryCode.USA,
+                },
+                Meta = new TransactionMeta()
+                {
+                    ClientCustomerID = "0000000",
+                    ClientTransactionID = "000000000",
+                    ClientTransactionDescription = "Description",
+                    ClientInvoiceID = "000000",
+                }
+
             });
+            
+            
             var refundSale = _refundService.Refund(new RefundRequest
             {
                 Amount = chargeSale.Amount,
-                Charge = chargeSale.Id
+                Charge = chargeSale.ID
             });
 
             //sale charge transaction, with saved payment instrument
             var tokenPaymentInstrument = _tokenService.Tokenize(tokenizeRequest);
             var chargePaymentInstrument = _chargeService.Charge(new ChargeRequest
             {
-                Source = tokenPaymentInstrument.Id,
-                Amount = 99,
-                ClientCustomerId = "0000000",
-                CofType = CofType.UNSCHEDULED_CARDHOLDER,
-                CurrencyCode = CurrencyCode.USD,
-                CountryCode = CountryCode.US,
-                ClientTransactionId = "000000000",
-                ClientTransactionDescription = "ChargeWithToken new HMAC",
-                ClientInvoiceId = "000000",
-                AVS = false,
-                SavePaymentInstrument = true,
-                CVV = "999"
+                Source = new PaymentSourceCardOnFile()
+                {
+                    Type = PaymentSourceType.CARD_ON_FILE,
+                    CardOnFile = new CardOnFile()
+                    {
+                        Id = tokenPaymentInstrument.Id,
+                        CVV = "999"
+                    }
+                } ,
+                Params = new TransactionParameters()
+                {
+                    Amount = 99,    
+                    CofType = CofType.UNSCHEDULED_CARDHOLDER,
+                    CurrencyCode = CurrencyCode.USD,
+                    CountryCode = ISO3166CountryCode.USA,
+                    SavePaymentInstrument = true // a permanent PaymentInstrument will be returned in the response
+                },
+                Meta = new TransactionMeta()
+                {
+                    ClientCustomerID = "0000000",
+                    ClientTransactionID = "000000000",
+                    ClientTransactionDescription = "ChargeWithToken new HMAC",
+                    ClientInvoiceID = "000000",    
+                }
             });
 
             var refundPaymentInstrument = _refundService.Refund(new RefundRequest
             {
                 Amount = chargePaymentInstrument.Amount,
-                Charge = chargePaymentInstrument.Id
-            });
-
-            //tokenize & sale charge transaction
-            var charge = _chargeService.Charge(GetPaymentInstrumentRequest(), 99);
-            var refundCharge = _refundService.Refund(new RefundRequest
-            {
-                Amount = charge.Amount,
-                Charge = charge.Id
+                Charge = chargePaymentInstrument.ID
             });
 
             //customers CRUD
@@ -121,7 +155,7 @@ namespace GloballyPaid
                     City = "CIty",
                     State = "State",
                     PostalCode = "00000",
-                    Country = "Country"
+                    CountryCode = ISO3166CountryCode.USA 
                 },
                 Email = $"jane.doe-{customerSuffix}@example.com",
                 Phone = "0000000000"
@@ -149,21 +183,24 @@ namespace GloballyPaid
                     City = "CIty",
                     State = "State",
                     PostalCode = "00000",
-                    Country = "Country"
+                    CountryCode = ISO3166CountryCode.USA
                 },
                 Email = $"jane.doe-{customerSuffixForPI}@example.com",
                 Phone = "0000000000"
             });
 
-            var paymentInstrument = _paymentInstrumentService.Create("41111111111111", "999", new PaymentInstrument
+            var paymentInstrument = _paymentInstrumentService.Create(new PaymentInstrumentRequest()
             {
                 Type = PaymentType.CreditCard,
+                CreditCard = new CreditCard()
+                {
+                    Number = "4111111111111111",
+                    Expiration = "0725"
+                    
+                },
                 CustomerId = customerForPaymentInstrument.Id,
                 ClientCustomerId = "0000000",
-                Brand = "Visa",
-                Expiration = "0725",
-                LastFour = "1111",
-                BillingContact = new Contact
+                BillingContact = new BillingContact()
                 {
                     FirstName = "Jane",
                     LastName = "Doe",
@@ -173,7 +210,7 @@ namespace GloballyPaid
                         City = "CIty",
                         State = "State",
                         PostalCode = "00000",
-                        Country = "Country"
+                        CountryCode = ISO3166CountryCode.USA
                     },
                     Email = "jane.doe@example.com",
                     Phone = "0000000000"
@@ -184,13 +221,13 @@ namespace GloballyPaid
 
             //first PaymentInstrument with alias
             var paymentInstrumentAliasId = paymentInstruments[0].Id;
-            paymentInstrument = _paymentInstrumentService.Get(paymentInstrumentAliasId);
+            paymentInstrument = _paymentInstrumentService.Get(paymentInstrumentAliasId, customerForPaymentInstrument.Id);
 
             paymentInstrument.BillingContact.LastName = "Smith";
             paymentInstrument = _paymentInstrumentService.Update(paymentInstrument);
-            paymentInstrument = _paymentInstrumentService.Get(paymentInstrument.Id);
+            paymentInstrument = _paymentInstrumentService.Get(paymentInstrument.Id, customerForPaymentInstrument.Id);
 
-            _paymentInstrumentService.Delete(paymentInstrumentAliasId);
+            _paymentInstrumentService.Delete(paymentInstrumentAliasId, customerForPaymentInstrument.Id);
             paymentInstruments = _paymentInstrumentService.List(customerForPaymentInstrument.Id);
 
             DisposeServices();
@@ -205,7 +242,7 @@ namespace GloballyPaid
                 {
                     Number = "4111111111111111",
                     Expiration = "1225",
-                    Cvv = "999"
+                    CVV = "999"
                 },
                 BillingContact = new Contact
                 {
@@ -214,10 +251,10 @@ namespace GloballyPaid
                     Address = new Address
                     {
                         Line1 = "Address Line 1",
-                        City = "CIty",
-                        State = "State",
+                        City = "Los Angeles",
+                        State = "CA",
                         PostalCode = "00000",
-                        Country = "Country"
+                        CountryCode = ISO3166CountryCode.USA
                     },
                     Phone = "000-000-0000",
                     Email = "test@test.com"
