@@ -1,3 +1,4 @@
+using DeepStack.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -19,8 +20,16 @@ namespace GloballyPaid.CSharp.Sdk.SampleApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+            
+            services.AddControllers()
+                .AddNewtonsoftJson(x =>
+                {
+                    x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+                    x.AllowInputFormatterExceptionMessages = false;
+                })
+                .AddXmlSerializerFormatters();
 
-            services.AddGloballyPaid(
+            services.AddDeepStack(
                 Configuration.GetValue<string>("GloballyPaid:PublishableApiKey"), 
                 Configuration.GetValue<string>("GloballyPaid:SharedSecret"), 
                 Configuration.GetValue<string>("GloballyPaid:AppId"),

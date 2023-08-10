@@ -2,19 +2,18 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="GloballyPaid.net" Version="1.0.0.6" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="GloballyPaid.CSharp.Sdk, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\..\SDKs\globallypaid-sdk-dotnet\src\GloballyPaid.CSharp.Sdk\bin\Debug\netstandard2.0\GloballyPaid.CSharp.Sdk.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\..\dotnet-sdk-globallypaid\src\GloballyPaid.CSharp.Sdk\GloballyPaid.CSharp.Sdk.csproj" />
   </ItemGroup>
 
 </Project>

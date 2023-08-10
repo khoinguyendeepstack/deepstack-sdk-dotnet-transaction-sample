@@ -1,4 +1,9 @@
 ﻿using System.Diagnostics;
+using DeepStack.Core;
+using DeepStack.Entities.Common;
+using DeepStack.Enums;
+using DeepStack.Requests;
+using DeepStack.Services.v1.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using GloballyPaid.CSharp.Sdk.SampleApp.Models;
@@ -9,10 +14,18 @@ namespace GloballyPaid.CSharp.Sdk.SampleApp.Controllers
     {
         private readonly ILogger<SampleController> _logger;
         private readonly IChargeService _chargeService;
-
-        public SampleController(IChargeService chargeService, ILogger<SampleController> logger)
+        private readonly ITokenService _tokenService;
+        private readonly IRefundService _refundService;
+        private readonly ICaptureService _captureService;
+        private readonly IPaymentInstrumentService _paymentInstrumentService;
+        
+        public SampleController(IChargeService chargeService, ITokenService tokenService, ICaptureService captureService, IRefundService refundService, IPaymentInstrumentService paymentInstrumentService, ILogger<SampleController> logger)
         {
+            _captureService = captureService;
+            _refundService = refundService;
+            _tokenService = tokenService;
             _chargeService = chargeService;
+            _paymentInstrumentService = paymentInstrumentService;
             _logger = logger;
         }
 
@@ -22,8 +35,9 @@ namespace GloballyPaid.CSharp.Sdk.SampleApp.Controllers
         }
 
         [HttpPost]
-        public IActionResult Charge([FromBody] SampleChargeRequest chargeRequest)
+        public IActionResult Charge([FromBody] BaseTokenResponse chargeRequest)
         {
+
             var request = new ChargeRequest
             {
                 Source = new PaymentSourceCardOnFile()
@@ -31,7 +45,7 @@ namespace GloballyPaid.CSharp.Sdk.SampleApp.Controllers
                     Type = PaymentSourceType.CARD_ON_FILE,
                     CardOnFile = new CardOnFile()
                     {
-                        Id = chargeRequest.Source,
+                        Id = chargeRequest.ID,
                         CVV = chargeRequest.CVV // should be provided when the transaction is user attended
                     }
                 },
@@ -42,7 +56,7 @@ namespace GloballyPaid.CSharp.Sdk.SampleApp.Controllers
                     CofType = CofType.UNSCHEDULED_CARDHOLDER,
                     CurrencyCode = CurrencyCode.USD,
                     CountryCode = ISO3166CountryCode.USA,
-                    SavePaymentInstrument = true
+                    SavePaymentInstrument = false
                 },
                 Meta = new TransactionMeta(){
                     ClientCustomerID = "12345", //set your customer id
@@ -52,16 +66,22 @@ namespace GloballyPaid.CSharp.Sdk.SampleApp.Controllers
                 }
             };
 
+
             try
             {
                 var charge = _chargeService.Charge(request);
                 return Ok(charge);
 
             }
+            catch (DeepStackException ex)
+            {
+                return BadRequest(ex.ErrorMessage);
+            }
             catch (System.Exception ex)
             {
                 var exx = ex;
-                throw;
+                // throw;
+                return BadRequest(ex.Message);
             }
         }
 
