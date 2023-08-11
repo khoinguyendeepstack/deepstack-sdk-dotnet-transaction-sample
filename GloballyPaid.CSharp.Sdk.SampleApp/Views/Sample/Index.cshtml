@@ -149,6 +149,7 @@
             },
             (error) => {
                 cardExtended.showError("Charge Failed. Please check your browser console for logs.");
+                apiResponseField.value = "Error:\n " + JSON.stringify(error, null, 4);
             }
         );
 
@@ -190,6 +191,7 @@
             (error) => {
                 cardExtended.showError("Charge Failed. Please check your browser console for logs.");
                 console.log(error);
+                apiResponseField.value = "Error:\n " + JSON.stringify(error, null, 4);
             }
         );
 
